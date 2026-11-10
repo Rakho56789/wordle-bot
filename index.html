@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Wordle</title>
+    <title>Wordle RU</title>
     <style>
         :root {
             --bg-color: #121213;
@@ -17,7 +17,7 @@
         body {
             background-color: var(--bg-color);
             color: var(--text-color);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             margin: 0;
             display: flex;
             flex-direction: column;
@@ -29,12 +29,20 @@
         }
         header {
             text-align: center;
-            padding: 10px;
-            font-size: 22px;
+            padding: 12px;
+            font-size: 20px;
             font-weight: bold;
             letter-spacing: 2px;
             border-bottom: 1px solid var(--border);
             width: 100%;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            background: #18181a;
+        }
+        .stats-info {
+            font-size: 13px;
+            color: #818384;
         }
         .board {
             display: grid;
@@ -61,24 +69,28 @@
             font-weight: bold;
             text-transform: uppercase;
             border-radius: 4px;
-            transition: transform 0.3s ease;
+            transition: transform 0.6s ease, background-color 0.6s ease, border-color 0.6s ease;
         }
-        .tile.filled { border-color: #565758; }
+        .tile.filled { border-color: #565758; transform: scale(1.03); }
         .tile.absent { background-color: var(--absent); border-color: var(--absent); color: white; }
         .tile.present { background-color: var(--present); border-color: var(--present); color: white; }
         .tile.correct { background-color: var(--correct); border-color: var(--correct); color: white; }
+        
+        .tile.flip {
+            transform: rotateX(90deg);
+        }
 
         .keyboard {
             width: 100%;
             max-width: 500px;
-            padding: 10px 5px 20px 5px;
+            padding: 5px 5px 20px 5px;
             box-sizing: border-box;
         }
         .key-row {
             display: flex;
             justify-content: center;
-            gap: 6px;
-            margin-bottom: 8px;
+            gap: 5px;
+            margin-bottom: 6px;
         }
         .key {
             background-color: var(--key-bg);
@@ -86,40 +98,68 @@
             border: none;
             border-radius: 4px;
             font-weight: bold;
-            font-size: 14px;
-            height: 50px;
+            font-size: 13px;
+            height: 48px;
             flex: 1;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             text-transform: uppercase;
+            transition: background 0.2s;
         }
-        .key.wide { flex: 1.5; font-size: 12px; }
+        .key.wide { flex: 1.5; font-size: 11px; }
         #message {
             position: fixed;
             top: 70px;
-            background: rgba(0,0,0,0.85);
+            background: rgba(0,0,0,0.9);
+            color: white;
             padding: 10px 20px;
             border-radius: 8px;
             font-weight: bold;
             display: none;
             z-index: 100;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
         }
     </style>
 </head>
 <body>
-    <header>WORDLE RU</header>
+    <header>
+        <span>WORDLE RU</span>
+        <div class="stats-info" id="statsDisplay">Побед: 0 | Серия: 0</div>
+    </header>
+    
     <div id="message">Сообщение</div>
     <div class="board" id="board"></div>
     <div class="keyboard" id="keyboard"></div>
 
     <script>
-        const WORDS = ["КНИГА", "ПИЛОТ", "АТЛАС", "ОКЕАН", "ДЕРЕВО", "ШКОЛА", "УСПЕХ"];
-        const secret = WORDS[Math.floor(Math.random() * WORDS.length)];
-        let currentRow = 0, currentTile = 0;
+        // База крутых и понятных слов для школьного проекта
+        const WORDS = [
+            "КНИГА", "ПИЛОТ", "АТЛАС", "ОКЕАН", "ДЕРЕВО", 
+            "ШКОЛА", "УСПЕХ", "НАУКА", "КАТЕР", "ФИЛЬМ", 
+            "ГОРОД", "ПОЕЗД", "МАТЕМ", "ЛАГЕР", "ТКАНЬ",
+            "ЗАКОН", "ЗЕМЛЯ", "ЗЕРНО", "ИГРОК", "ИСКРА",
+            "КАНАЛ", "КОВЕР", "ЛЕНТА", "ЛОГИК", "МАСЛО", 
+            "МАЯКЕ", "МЕТРО", "ОБЛАК", "ОПЕРА", "ПАРТА", 
+            "ПЕСНЯ", "ПЛАНШ", "ПОЧТА", "РАБОТ", "РАКЕТ", 
+            "РУЧКА", "САЛЮТ", "СЕВЕР", "СКАЛА", "СЛОВО", 
+            "СПОРТ", "СХЕМА", "ТАНЕЦ", "ТЕКСТ", "ТРАВА", 
+            "ФАКТЫ", "ФРУКТ", "ХОЛСТ", "ЦВЕТЫ", "ЭКРАН", "ЮРИСТ"
+        ];
+
+        let secret = WORDS[Math.floor(Math.random() * WORDS.length)];
+        let currentRow = 0, currentTile = 0, isAnimating = false;
         const boardState = Array(6).fill("").map(() => Array(5).fill(""));
         const keysState = {};
+
+        let stats = JSON.parse(localStorage.getItem('wordle_stats') || '{"wins":0, "streak":0}');
+        updateStatsUI();
+
+        function updateStatsUI() {
+            document.getElementById('statsDisplay').textContent = `Побед: ${stats.wins} | Серия: ${stats.streak}`;
+        }
 
         const boardEl = document.getElementById('board');
         for (let r = 0; r < 6; r++) {
@@ -139,6 +179,7 @@
             ["Ф","Ы","В","А","П","Р","О","Л","Д","Ж","Э"],
             ["ENTER","Я","Ч","С","М","И","Т","Ь","Б","Ю","⌫"]
         ];
+        
         const keyboardEl = document.getElementById('keyboard');
         keys.forEach(row => {
             const rowEl = document.createElement('div');
@@ -155,6 +196,7 @@
         });
 
         function handleKey(key) {
+            if (isAnimating) return;
             if (key === '⌫') {
                 if (currentTile > 0) {
                     currentTile--;
@@ -162,7 +204,11 @@
                     updateTile(currentRow, currentTile, "");
                 }
             } else if (key === 'ENTER') {
-                if (currentTile === 5) checkRow();
+                if (currentTile === 5) {
+                    checkRow();
+                } else {
+                    showMsg("Введите 5 букв!");
+                }
             } else {
                 if (currentTile < 5) {
                     boardState[currentRow][currentTile] = key;
@@ -187,8 +233,14 @@
 
         function checkRow() {
             const guess = boardState[currentRow].join("");
-            if (guess.length < 5) return;
+            
+            // Проверка: слово должно быть в нашем списке
+            if (!WORDS.includes(guess)) {
+                showMsg("❌ Такого слова нет в базе!");
+                return;
+            }
 
+            isAnimating = true;
             const secretChars = secret.split("");
             const guessChars = guess.split("");
             const statuses = Array(5).fill("absent");
@@ -210,26 +262,49 @@
                 }
             }
 
+            // Анимация переворота плиток по очереди
             for (let i = 0; i < 5; i++) {
-                const tile = document.getElementById(`tile-${currentRow}-${i}`);
-                tile.classList.add(statuses[i]);
-                const btn = keysState[guess[i]];
-                if (btn) {
-                    if (statuses[i] === 'correct') btn.style.background = 'var(--correct)';
-                    else if (statuses[i] === 'present' && btn.style.background !== 'var(--correct)') btn.style.background = 'var(--present)';
-                    else if (statuses[i] === 'absent' && !['var(--correct)','var(--present)'].includes(btn.style.background)) btn.style.background = 'var(--absent)';
-                }
+                setTimeout(() => {
+                    const tile = document.getElementById(`tile-${currentRow}-${i}`);
+                    tile.classList.add('flip');
+                    
+                    setTimeout(() => {
+                        tile.classList.remove('flip');
+                        tile.classList.add(statuses[i]);
+                        
+                        const btn = keysState[guess[i]];
+                        if (btn) {
+                            if (statuses[i] === 'correct') btn.style.background = 'var(--correct)';
+                            else if (statuses[i] === 'present' && btn.style.background !== 'var(--correct)') btn.style.background = 'var(--present)';
+                            else if (statuses[i] === 'absent' && !['var(--correct)','var(--present)'].includes(btn.style.background)) btn.style.background = 'var(--absent)';
+                        }
+                    }, 300);
+                }, i * 250);
             }
 
-            if (guess === secret) {
-                showMsg("🎉 Победа! Ты угадал слово!");
-                return;
-            }
-            currentRow++;
-            currentTile = 0;
-            if (currentRow === 6) {
-                showMsg(`😢 Проигрыш! Было слово: ${secret}`);
-            }
+            setTimeout(() => {
+                isAnimating = false;
+                if (guess === secret) {
+                    stats.wins++;
+                    stats.streak++;
+                    localStorage.setItem('wordle_stats', JSON.stringify(stats));
+                    updateStatsUI();
+                    showMsg("🎉 Победа! Отличная работа!");
+                    setTimeout(() => location.reload(), 2500);
+                    return;
+                }
+
+                currentRow++;
+                currentTile = 0;
+                
+                if (currentRow === 6) {
+                    stats.streak = 0;
+                    localStorage.setItem('wordle_stats', JSON.stringify(stats));
+                    updateStatsUI();
+                    showMsg(`😢 Поражение! Было слово: ${secret}`);
+                    setTimeout(() => location.reload(), 3000);
+                }
+            }, 1500);
         }
     </script>
 </body>
