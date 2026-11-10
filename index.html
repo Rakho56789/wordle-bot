@@ -228,7 +228,6 @@
             window.Telegram.WebApp.ready();
         }
 
-        // Слова, которые бот может загадывать
         const SECRET_WORDS = [
             "ШАРИК", "ПИРАТ", "КНИГА", "ПИЛОТ", "АТЛАС", "ОКЕАН", "ДЕРЕВО", "ШКОЛА", "УСПЕХ", "НАУКА", 
             "КАТЕР", "ФИЛЬМ", "ГОРОД", "ПОЕЗД", "МАТЕМ", "ЛАГЕР", "ТКАНЬ", "ЗАКОН", "ЗЕМЛЯ", "ЗЕРНО", 
@@ -243,7 +242,6 @@
             "ФИНИШ", "ФОРМА", "ХАКЕР", "ХОББИ", "ХОЛОД", "ЦЕПЬ", "ЦИКЛЫ", "БРОНЯ", "ВАЛЬС", "КУРСК", "ТИГРЫ"
         ];
 
-        // Огромная база разрешенных слов (включая твои слова и сотни других)
         const VALID_WORDS = new Set([
             ...SECRET_WORDS,
             "ШАРИК", "ПИРАТ", "АВТОР", "АГЕНТ", "АКЦИЯ", "АНГАР", "АРЕНА", "БАКЕН", "БАЛЕТ", "БАНКА", 
@@ -349,6 +347,21 @@
                 if (key.length === 1) keysState[key] = btn;
             });
             keyboardEl.appendChild(rowEl);
+        });
+
+        // Поддержка нажатий с физической клавиатуры компьютера
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Backspace') {
+                handleKey('⌫');
+            } else if (e.key === 'Enter') {
+                handleKey('ENTER');
+            } else {
+                const key = e.key.toUpperCase();
+                const russianAlphabet = "ЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮ";
+                if (russianAlphabet.includes(key)) {
+                    handleKey(key);
+                }
+            }
         });
 
         function handleKey(key) {
