@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Wordle RU Ultimate Pro</title>
+    <title>Wordle RU Speed Battle</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
@@ -15,8 +15,8 @@
             --correct: #538d4e;
             --border: rgba(255, 255, 255, 0.1);
             --key-bg: #818384;
-            --accent: #8e44ad;
-            --accent-glow: rgba(142, 68, 173, 0.4);
+            --accent: #7c5cff;
+            --accent-glow: rgba(124, 92, 255, 0.4);
         }
         body {
             background: var(--bg-gradient);
@@ -33,8 +33,8 @@
         }
         header {
             text-align: center;
-            padding: 10px 15px;
-            font-size: 16px;
+            padding: 8px 12px;
+            font-size: 15px;
             font-weight: bold;
             border-bottom: 1px solid var(--border);
             width: 100%;
@@ -52,23 +52,23 @@
             color: #b0b0c0;
         }
         .header-title {
-            font-size: 16px;
+            font-size: 15px;
             color: #fff;
             letter-spacing: 2px;
             text-shadow: 0 0 10px rgba(255,255,255,0.3);
         }
         .controls-bar {
             display: flex;
-            gap: 6px;
+            gap: 5px;
             align-items: center;
         }
         .btn-small {
             background: var(--accent);
             color: white;
             border: none;
-            padding: 6px 10px;
+            padding: 5px 8px;
             border-radius: 6px;
-            font-size: 11px;
+            font-size: 10px;
             font-weight: bold;
             cursor: pointer;
             box-shadow: 0 2px 8px var(--accent-glow);
@@ -79,31 +79,30 @@
         .board {
             display: grid;
             grid-template-rows: repeat(6, 1fr);
-            gap: 6px;
+            gap: 5px;
             padding: 10px;
             box-sizing: border-box;
             aspect-ratio: 5 / 6;
-            max-height: 36vh;
+            max-height: 35vh;
         }
         .row {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
-            gap: 6px;
+            gap: 5px;
         }
         .tile {
-            width: 44px;
-            height: 44px;
+            width: 42px;
+            height: 42px;
             border: 2px solid var(--border);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 22px;
+            font-size: 20px;
             font-weight: bold;
             text-transform: uppercase;
             border-radius: 8px;
             background: rgba(255, 255, 255, 0.03);
             backdrop-filter: blur(5px);
-            box-shadow: inset 0 2px 4px rgba(255,255,255,0.05);
             transition: transform 0.4s ease, background-color 0.4s ease, border-color 0.4s ease;
         }
         .tile.filled { border-color: rgba(255,255,255,0.4); transform: scale(1.02); }
@@ -114,15 +113,15 @@
 
         .keyboard {
             width: 100%;
-            max-width: 460px;
-            padding: 5px 4px 20px 4px;
+            max-width: 450px;
+            padding: 5px 4px 15px 4px;
             box-sizing: border-box;
         }
         .key-row {
             display: flex;
             justify-content: center;
-            gap: 5px;
-            margin-bottom: 6px;
+            gap: 4px;
+            margin-bottom: 5px;
         }
         .key {
             background-color: rgba(255, 255, 255, 0.12);
@@ -131,33 +130,33 @@
             border-radius: 6px;
             font-weight: bold;
             font-size: 12px;
-            height: 45px;
+            height: 42px;
             flex: 1;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             text-transform: uppercase;
-            transition: background 0.2s;
         }
         .key:active { background-color: rgba(255, 255, 255, 0.3); }
         .key.wide { flex: 1.5; font-size: 10px; }
         
         #message {
             position: fixed;
-            top: 65px;
+            top: 60px;
             background: rgba(15, 15, 25, 0.95);
             color: white;
-            padding: 10px 20px;
+            padding: 8px 16px;
             border-radius: 8px;
             font-weight: bold;
             display: none;
             z-index: 100;
             border: 1px solid var(--accent);
             box-shadow: 0 4px 20px var(--accent-glow);
-            font-size: 13px;
+            font-size: 12px;
         }
 
+        /* Модальные окна */
         .modal {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -170,15 +169,24 @@
         }
         .modal-content {
             background: #1e1e2f;
-            padding: 25px;
+            padding: 20px;
             border-radius: 14px;
             text-align: center;
             border: 1px solid var(--border);
-            width: 80%;
-            max-width: 300px;
+            width: 85%;
+            max-width: 310px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
-        .modal-content h2 { margin-top: 0; color: #a29bfe; font-size: 22px; }
+        .modal-content h2 { margin-top: 0; color: #a29bfe; font-size: 20px; }
+        .leaderboard-list {
+            text-align: left;
+            background: rgba(0,0,0,0.2);
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-size: 13px;
+        }
+        .leaderboard-list div { padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .modal-btn {
             background: var(--accent);
             color: white;
@@ -187,8 +195,8 @@
             border-radius: 8px;
             font-weight: bold;
             cursor: pointer;
-            margin-top: 15px;
-            font-size: 14px;
+            margin-top: 10px;
+            font-size: 13px;
             width: 100%;
             box-shadow: 0 4px 12px var(--accent-glow);
         }
@@ -198,9 +206,10 @@
     <header>
         <div class="header-left">
             <span class="header-title">WORDLE</span>
-            <span id="diffLabel">Режим: Обычный</span>
+            <span id="timerDisplay">⏱️ 0.0с</span>
         </div>
         <div class="controls-bar">
+            <button class="btn-small" onclick="openLeaderboard()">🏆 Топ</button>
             <button class="btn-small" id="hintBtn" onclick="giveHint()">💡 Подсказка</button>
             <button class="btn-small" onclick="toggleDifficulty()">⚙️ Режим</button>
         </div>
@@ -214,11 +223,23 @@
     <div class="board" id="board"></div>
     <div class="keyboard" id="keyboard"></div>
 
+    <!-- Модальное окно победы / поражения -->
     <div class="modal" id="resultModal">
         <div class="modal-content">
             <h2 id="modalTitle">Победа!</h2>
-            <p id="modalText">Слово угадано!</p>
+            <p id="modalText">Время: 0с</p>
             <button class="modal-btn" onclick="nextGame()">Следующая игра</button>
+        </div>
+    </div>
+
+    <!-- Модальное окно таблицы лидеров (Топ времени) -->
+    <div class="modal" id="leaderboardModal">
+        <div class="modal-content">
+            <h2>🏆 Таблица рекордов</h2>
+            <div class="leaderboard-list" id="leaderboardContent">
+                <div>1. Еще нет рекордов</div>
+            </div>
+            <button class="modal-btn" onclick="closeLeaderboard()">Закрыть</button>
         </div>
     </div>
 
@@ -242,63 +263,45 @@
             "ФИНИШ", "ФОРМА", "ХАКЕР", "ХОББИ", "ХОЛОД", "ЦЕПЬ", "ЦИКЛЫ", "БРОНЯ", "ВАЛЬС", "КУРСК", "ТИГРЫ"
         ];
 
-        const VALID_WORDS = new Set([
-            ...SECRET_WORDS,
-            "ШАРИК", "ПИРАТ", "АВТОР", "АГЕНТ", "АКЦИЯ", "АНГАР", "АРЕНА", "БАКЕН", "БАЛЕТ", "БАНКА", 
-            "БАРЖА", "БАСНЯ", "БЕЛКА", "БЕРЕГ", "БИЛЕТ", "БИТВА", "БЛЮДО", "БОКАЛ", "БОЧКА", "БУДКА", 
-            "ВАГОН", "ВАННА", "ВЕДРО", "ВЕНЕЦ", "ВЕТКА", "ВИЛКА", "ВИСОК", "ВИТОК", "ВЛАГА", "ВОДКА", 
-            "ВОЖАК", "ВОЛНА", "ВОРОТ", "ВУЛКАН", "ГАРАЖ", "ГЕРОЙ", "ГЛИНА", "ГНЕЗД", "ГОРОХ", "ГОСТЬ", 
-            "ГРУДЬ", "ДИВАН", "ДОБРО", "ДОЖДЬ", "ДОМЕН", "ДОСКА", "ДРАМА", "ДРОВА", "ДУПЛО", "ДЫМКА", 
-            "ЕДИНИ", "ЖАЖДА", "ЖИВОТ", "ЖИРАФ", "ЖУЛИК", "ЗАБОР", "ЗАПАХ", "ЗАПАС", "ЗАХОД", "ЗВЕНО", 
-            "ЗЕНИТ", "ЗОЛОТ", "ИДЕАЛ", "ИКОНА", "ИТОГИ", "КАБАН", "КАДРЫ", "КАЗНА", "КАРТА", "КЕПКА", 
-            "КИОСК", "КЛЕЩИ", "КЛЮЧИ", "КОВЧЕ", "КОЖАН", "КОЙКА", "КОЛОК", "КОМАР", "КОНЕЦ", "КОПЬЕ", 
-            "КОРОН", "КОСТЬ", "КОТЕЛ", "КОФЕЙ", "КРАБЫ", "КРАСК", "КРЕМЛЬ", "КРОВЬ", "КРЫША", "КУБИК", 
-            "КУЛАК", "КУПЕЦ", "КУРИЦ", "КУСОК", "КУХНЯ", "ЛАВКА", "ЛАДЬЯ", "ЛАЙКА", "ЛАМПА", "ЛИМОН", 
-            "ЛИНИЯ", "ЛОВЕЦ", "ЛОДКА", "ЛОЖКА", "ЛОКОН", "ЛУЧИК", "МАГИЯ", "МАЖОР", "МАЙКА", "МАКЕТ", 
-            "МАЛЫШ", "МЕДИК", "МЕЛОЧ", "МЕРКА", "МЕТОД", "МЕШОК", "МИНУС", "МОБИЛ", "МОГИЛ", "МОДЕЛ", 
-            "МОНЕТ", "МОСКВ", "МОТИВ", "МОШКА", "МУЖИК", "МУЗЫК", "МЫШКА", "НАБОР", "НАВЕС", "НАЛОГ", 
-            "НАРОД", "НАСОС", "НЕДЕЛ", "НЕМЕЦ", "НЕРВЫ", "НОЖИК", "НОМЕР", "НОТКА", "ОБЕДЫ", "ОБРАЗ", 
-            "ОБУВЬ", "ОВОЩИ", "ОГОНЬ", "ОКУНЬ", "ОМЛЕТ", "ОПЕРА", "ОРДЕР", "ОСЕНЬ", "ОСТРОВ", "ОТВЕТ", 
-            "ОТДЕЛ", "ОХОТА", "ПАРАД", "ПАПКА", "ПАСКА", "ПАУКИ", "ПЕКАР", "ПЕКЛО", "ПЕНАЛ", "ПЕРЕЦ", 
-            "ПЕСОК", "ПИКЕТ", "ПИСМО", "ПИТЬЕ", "ПЛАТА", "ПЛЕЧО", "ПЛИТА", "ПЛОТЬ", "ПОБЕД", "ПОГОД", 
-            "ПОЖАР", "ПОИСК", "ПОКАЗ", "ПОЛКА", "ПОЛЬЗ", "ПОРОГ", "ПОРТЫ", "ПРАВО", "ПРЕСС", "ПРИНЦ", 
-            "ПРОБА", "ПТИЦА", "ПУЛЬС", "ПЯТНО", "РАДИО", "РАЗУМ", "РАМПА", "РЕАКТ", "РЕБРО", "РЕЖИМ", 
-            "РЕНТА", "РУПОР", "РЫБАК", "РЫНОК", "РЯДОК", "САЛАТ", "САПОГ", "СВЕКЛ", "СЕВЕР", "СЕМЬЯ", 
-            "СЕНАТ", "СЕРДЦ", "СЕСТР", "СИНЯК", "СИРОТ", "СКЛАД", "СКУКА", "СЛАВА", "СЛЕЗА", "СЛОВО", 
-            "СЛУХИ", "СМЕНА", "СМЕРТ", "СМОТР", "СОБАЧ", "СОБОР", "СОВЕТ", "СОКОЛ", "СОСЕД", "СОСНА", 
-            "СОТНЯ", "СПАЗМ", "СПИРТ", "СПОРТ", "СРОКИ", "СТАДО", "СТЕНД", "СТЕПЬ", "СТИЛЬ", "СТОЛБ", 
-            "СТРАХ", "СТУЛЫ", "СУДЬЯ", "СУПЕР", "СУХОЙ", "СХОДЫ", "СЫРЬЕ", "ТАБАК", "ТАБУН", "ТАЙНА", 
-            "ТАРИФ", "ТЕКСТ", "ТЕЛЕЦ", "ТЕМПО", "ТЕПЛО", "ТЕСТЫ", "ТИГРЫ", "ТИПИК", "ТКАНЬ", "ТОКАР", 
-            "ТОЛПА", "ТОМАТ", "ТОПКА", "ТОПОР", "ТОЧКА", "ТРАВА", "ТРАКТ", "ТРЕСТ", "ТРОПА", "ТРУБА", 
-            "ТУМАН", "УГРОЗ", "УДАРЫ", "УЖАСЫ", "УКРОП", "УЛИЦА", "УРОКИ", "УТРОМ", "ФАКЕЛ", "ФАКТЫ", 
-            "ФИЗИК", "ФИЛЬМ", "ФИНИШ", "ФОКУС", "ФОНДЫ", "ФОРМА", "ФРАЗА", "ФРУКТ", "ХАКЕР", "ХАЛАТ", 
-            "ХВОСТ", "ХИМИК", "ХЛЕБЫ", "ХОББИ", "ХОЛОД", "ХРАМЫ", "ЦАРЕВ", "ЦВЕТЫ", "ЦЕЛОЕ", "ЦИКЛЫ", 
-            "ЦЫГАН", "ЧАЙКА", "ЧАСИК", "ЧАШКА", "ЧЕРВЬ", "ЧЕРТЫ", "ЧЕХОЛ", "ЧИСЛО", "ЧУДЕС", "ШАЙБА", 
-            "ШАПКА", "ШАХТЫ", "ШЕРСТ", "ШКОЛА", "ШПИОН", "ШТАТЫ", "ШТУКА", "ЭКРАН", "ЭЛИТА", "ЭМАЛЬ", 
-            "ЭНЕРГ", "ЭТИКА", "ЮРИСТ", "ЯБЛОК", "ЯХТЫ", "ЯЩИКЕ"
-        ]);
+        const VALID_WORDS = new Set([...SECRET_WORDS, "ШАРИК", "ПИРАТ", "АВТОР", "АГЕНТ", "АКЦИЯ", "АНГАР", "АРЕНА", "БАКЕН", "БАЛЕТ", "БАНКА", "БАРЖА", "БАСНЯ", "БЕЛКА", "БЕРЕГ", "БИЛЕТ", "БИТВА", "БЛЮДО", "БОКАЛ", "БОЧКА", "БУДКА", "ВАГОН", "ВАННА", "ВЕДРО", "ВЕНЕЦ", "ВЕТКА", "ВИЛКА", "ВИСОК", "ВИТОК", "ВЛАГА", "ВОДКА", "ВОЖАК", "ВОЛНА", "ВОРОТ", "ВУЛКАН", "ГАРАЖ", "ГЕРОЙ", "ГЛИНА", "ГНЕЗД", "ГОРОХ", "ГОСТЬ", "ГРУДЬ", "ДИВАН", "ДОБРО", "ДОЖДЬ", "ДОМЕН", "ДОСКА", "ДРАМА", "ДРОВА", "ДУПЛО", "ДЫМКА", "ЕДИНИ", "ЖАЖДА", "ЖИВОТ", "ЖИРАФ", "ЖУЛИК", "ЗАБОР", "ЗАПАХ", "ЗАПАС", "ЗАХОД", "ЗВЕНО", "ЗЕНИТ", "ЗОЛОТ", "ИДЕАЛ", "ИКОНА", "ИТОГИ", "КАБАН", "КАДРЫ", "КАЗНА", "КАРТА", "КЕПКА", "КИОСК", "КЛЕЩИ", "КЛЮЧИ", "КОВЧЕ", "КОЖАН", "КОЙКА", "КОЛОК", "КОМАР", "КОНЕЦ", "КОПЬЕ", "КОРОН", "КОСТЬ", "КОТЕЛ", "КОФЕЙ", "КРАБЫ", "КРАСК", "КРЕМЛЬ", "КРОВЬ", "КРЫША", "КУБИК", "КУЛАК", "КУПЕЦ", "КУРИЦ", "КУСОК", "КУХНЯ", "ЛАВКА", "ЛАДЬЯ", "ЛАЙКА", "ЛАМПА", "ЛИМОН", "ЛИНИЯ", "ЛОВЕЦ", "ЛОДКА", "ЛОЖКА", "ЛОКОН", "ЛУЧИК", "МАГИЯ", "МАЖОР", "МАЙКА", "МАКЕТ", "МАЛЫШ", "МЕДИК", "МЕЛОЧ", "МЕРКА", "МЕТОД", "МЕШОК", "МИНУС", "МОБИЛ", "МОГИЛ", "МОДЕЛ", "МОНЕТ", "МОСКВ", "МОТИВ", "МОШКА", "МУЖИК", "МУЗЫК", "МЫШКА", "НАБОР", "НАВЕС", "НАЛОГ", "НАРОД", "НАСОС", "НЕДЕЛ", "НЕМЕЦ", "НЕРВЫ", "НОЖИК", "НОМЕР", "НОТКА", "ОБЕДЫ", "ОБРАЗ", "ОБУВЬ", "ОВОЩИ", "ОГОНЬ", "ОКУНЬ", "ОМЛЕТ", "ОПЕРА", "ОРДЕР", "ОСЕНЬ", "ОСТРОВ", "ОТВЕТ", "ОТДЕЛ", "ОХОТА", "ПАРАД", "ПАПКА", "ПАСКА", "ПАУКИ", "ПЕКАР", "ПЕКЛО", "ПЕНАЛ", "ПЕРЕЦ", "ПЕСОК", "ПИКЕТ", "ПИСМО", "ПИТЬЕ", "ПЛАТА", "ПЛЕЧО", "ПЛИТА", "ПЛОТЬ", "ПОБЕД", "ПОГОД", "ПОЖАР", "ПОИСК", "ПОКАЗ", "ПОЛКА", "ПОЛЬЗ", "ПОРОГ", "ПОРТЫ", "ПРАВО", "ПРЕСС", "ПРИНЦ", "ПРОБА", "ПТИЦА", "ПУЛЬС", "ПЯТНО", "РАДИО", "РАЗУМ", "РАМПА", "РЕАКТ", "РЕБРО", "РЕЖИМ", "РЕНТА", "РУПОР", "РЫБАК", "РЫНОК", "РЯДОК", "САЛАТ", "САПОГ", "СВЕКЛ", "СЕВЕР", "СЕМЬЯ", "СЕНАТ", "СЕРДЦ", "СЕСТР", "СИНЯК", "СИРОТ", "СКЛАД", "СКУКА", "СЛАВА", "СЛЕЗА", "СЛОВО", "СЛУХИ", "СМЕНА", "СМЕРТ", "СМОТР", "СОБАЧ", "СОБОР", "СОВЕТ", "СОКОЛ", "СОСЕД", "СОСНА", "СОТНЯ", "СПАЗМ", "СПИРТ", "СПОРТ", "СРОКИ", "СТАДО", "СТЕНД", "СТЕПЬ", "СТИЛЬ", "СТОЛБ", "СТРАХ", "СТУЛЫ", "СУДЬЯ", "СУПЕР", "СУХОЙ", "СХОДЫ", "СЫРЬЕ", "ТАБАК", "ТАБУН", "ТАЙНА", "ТАРИФ", "ТЕКСТ", "ТЕЛЕЦ", "ТЕМПО", "ТЕПЛО", "ТЕСТЫ", "ТИГРЫ", "ТИПИК", "ТКАНЬ", "ТОКАР", "ТОЛПА", "ТОМАТ", "ТОПКА", "ТОПОР", "ТОЧКА", "ТРАВА", "ТРАКТ", "ТРЕСТ", "TРОПА", "ТРУБА", "ТУМАН", "УГРОЗ", "УДАРЫ", "УЖАСЫ", "УКРОП", "УЛИЦА", "УРОКИ", "УТРОМ", "ФАКЕЛ", "ФАКТЫ", "ФИЗИК", "ФИЛЬМ", "ФИНИШ", "ФОКУС", "ФОНДЫ", "ФОРМА", "ФРАЗА", "ФРУКТ", "ХАКЕР", "ХАЛАТ", "ХВОСТ", "ХИМИК", "ХЛЕБЫ", "ХОББИ", "ХОЛОД", "ХРАМЫ", "ЦАРЕВ", "ЦВЕТЫ", "ЦЕЛОЕ", "ЦИКЛЫ", "ЦЫГАН", "ЧАЙКА", "ЧАСИК", "ЧАШКА", "ЧЕРВЬ", "ЧЕРТЫ", "ЧЕХОЛ", "ЧИСЛО", "ЧУДЕС", "ШАЙБА", "ШАПКА", "ШАХТЫ", "ШЕРСТ", "ШКОЛА", "ШПИОН", "ШТАТЫ", "ШТУКА", "ЭКРАН", "ЭЛИТА", "ЭМАЛЬ", "ЭНЕРГ", "ЭТИКА", "ЮРИСТ", "ЯБЛОК", "ЯХТЫ", "ЯЩИКЕ"]);
 
         let currentDifficulty = localStorage.getItem('wordle_diff') || 'normal';
         let maxRows = currentDifficulty === 'easy' ? 7 : (currentDifficulty === 'hard' ? 5 : 6);
         let secret = SECRET_WORDS[Math.floor(Math.random() * SECRET_WORDS.length)];
 
         let currentRow = 0, currentTile = 0, isAnimating = false, gameOver = false;
+        let startTime = null, timerInterval = null, elapsedTime = 0;
+        
         const boardState = Array(maxRows).fill("").map(() => Array(5).fill(""));
         const keysState = {};
 
         let stats = JSON.parse(localStorage.getItem('wordle_stats') || '{"wins":0, "streak":0}');
+        let leaderboard = JSON.parse(localStorage.getItem('wordle_leaderboard') || '[]');
         updateUIConfig();
 
         function updateUIConfig() {
             document.getElementById('winsCount').textContent = stats.wins;
             document.getElementById('streakCount').textContent = stats.streak;
             
-            let diffName = "Обычный (6)";
-            if (currentDifficulty === 'easy') { diffName = "Лёгкий (7)"; document.getElementById('hintBtn').style.display = 'block'; }
-            if (currentDifficulty === 'normal') { diffName = "Обычный (6)"; document.getElementById('hintBtn').style.display = 'block'; }
-            if (currentDifficulty === 'hard') { diffName = "Хардкор (5)"; document.getElementById('hintBtn').style.display = 'none'; }
+            let diffName = "Обычный";
+            if (currentDifficulty === 'easy') { diffName = "Лёгкий"; document.getElementById('hintBtn').style.display = 'block'; }
+            if (currentDifficulty === 'normal') { diffName = "Обычный"; document.getElementById('hintBtn').style.display = 'block'; }
+            if (currentDifficulty === 'hard') { diffName = "Хардкор"; document.getElementById('hintBtn').style.display = 'none'; }
             
             document.getElementById('diffLabel').textContent = `Режим: ${diffName}`;
+        }
+
+        function startTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            startTime = Date.now();
+            timerInterval = setInterval(() => {
+                elapsedTime = ((Date.now() - startTime) / 1000).toFixed(1);
+                document.getElementById('timerDisplay').textContent = `⏱️ ${elapsedTime}с`;
+            }, 100);
+        }
+
+        function stopTimer() {
+            if (timerInterval) clearInterval(timerInterval);
         }
 
         function toggleDifficulty() {
@@ -349,23 +352,23 @@
             keyboardEl.appendChild(rowEl);
         });
 
-        // Поддержка нажатий с физической клавиатуры компьютера
         window.addEventListener('keydown', (e) => {
-            if (e.key === 'Backspace') {
-                handleKey('⌫');
-            } else if (e.key === 'Enter') {
-                handleKey('ENTER');
-            } else {
+            if (e.key === 'Backspace') handleKey('⌫');
+            else if (e.key === 'Enter') handleKey('ENTER');
+            else {
                 const key = e.key.toUpperCase();
-                const russianAlphabet = "ЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮ";
-                if (russianAlphabet.includes(key)) {
-                    handleKey(key);
-                }
+                if ("ЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮ".includes(key)) handleKey(key);
             }
         });
 
         function handleKey(key) {
             if (isAnimating || gameOver) return;
+            
+            // Запуск таймера при первом вводе буквы
+            if (!startTime && key !== 'ENTER' && key !== '⌫') {
+                startTimer();
+            }
+
             if (key === '⌫') {
                 if (currentTile > 0) {
                     currentTile--;
@@ -411,14 +414,12 @@
                 }
             }
             if (unrevealed.length === 0) {
-                showMsg("💡 Все буквы уже открыты!");
+                showMsg("💡 Все буквы открыты!");
                 return;
             }
             let randomLetter = unrevealed[Math.floor(Math.random() * unrevealed.length)];
             showMsg(`💡 Подсказка: есть буква "${randomLetter}"`);
-            if(keysState[randomLetter]) {
-                keysState[randomLetter].style.background = '#e1b12c';
-            }
+            if(keysState[randomLetter]) keysState[randomLetter].style.background = '#e1b12c';
         }
 
         function checkRow() {
@@ -473,11 +474,16 @@
             setTimeout(() => {
                 isAnimating = false;
                 if (guess === secret) {
+                    stopTimer();
                     gameOver = true;
                     stats.wins++;
                     stats.streak++;
                     localStorage.setItem('wordle_stats', JSON.stringify(stats));
-                    showModal("🎉 Победа!", `Слово угадано: ${secret}`);
+                    
+                    // Сохраняем в таблицу лидеров
+                    saveScore(parseFloat(elapsedTime));
+                    
+                    showModal("🎉 Победа!", `Слово: ${secret}\nВремя: ${elapsedTime} сек.`);
                     return;
                 }
 
@@ -485,6 +491,7 @@
                 currentTile = 0;
                 
                 if (currentRow === maxRows) {
+                    stopTimer();
                     gameOver = true;
                     stats.streak = 0;
                     localStorage.setItem('wordle_stats', JSON.stringify(stats));
@@ -493,9 +500,30 @@
             }, 1200);
         }
 
+        function saveScore(time) {
+            leaderboard.push(time);
+            leaderboard.sort((a, b) => a - b); // Сортируем по возрастанию времени (кто быстрее)
+            if (leaderboard.length > 5) leaderboard = leaderboard.slice(0, 5); // Оставляем топ-5
+            localStorage.setItem('wordle_leaderboard', JSON.stringify(leaderboard));
+        }
+
+        function openLeaderboard() {
+            const content = document.getElementById('leaderboardContent');
+            if (leaderboard.length === 0) {
+                content.innerHTML = "<div>Пока нет рекордов. Сыграй партию!</div>";
+            } else {
+                content.innerHTML = leaderboard.map((t, idx) => `<div>${idx + 1}. <b>${t} сек.</b></div>`).join('');
+            }
+            document.getElementById('leaderboardModal').style.display = 'flex';
+        }
+
+        function closeLeaderboard() {
+            document.getElementById('leaderboardModal').style.display = 'none';
+        }
+
         function showModal(title, text) {
             document.getElementById('modalTitle').textContent = title;
-            document.getElementById('modalText').textContent = text;
+            document.getElementById('modalText').innerText = text;
             document.getElementById('resultModal').style.display = 'flex';
         }
 
@@ -505,6 +533,9 @@
             currentRow = 0;
             currentTile = 0;
             gameOver = false;
+            startTime = null;
+            elapsedTime = 0;
+            document.getElementById('timerDisplay').textContent = "⏱️ 0.0с";
             maxRows = currentDifficulty === 'easy' ? 7 : (currentDifficulty === 'hard' ? 5 : 6);
             buildBoard();
             Object.values(keysState).forEach(btn => btn.style.background = 'var(--key-bg)');
